@@ -41,7 +41,7 @@
             plugins: [
                 function (hook, vm) {
                     hook.beforeEach(function (html) {
-                        return html + '\n\n> Last Modified {docsify-updated}'
+                        return '> Last Modified {docsify-updated}\n\n' + html
                     })
                 }
             ],
@@ -53,12 +53,12 @@
                     }
                 }
             },
-            count: {
-                countable: true,
-                fontsize: '0.9em',
-                color: 'rgb(90,90,90)',
-                language: 'chinese'
-            },
+            // count: {
+            //     countable: true,
+            //     fontsize: '0.9em',
+            //     color: 'rgb(90,90,90)',
+            //     language: 'chinese'
+            // },
             // footer: {
             //     copy: '<span>Redamancyer &copy; 2022</span>',
             //     auth: 'by byeee',
@@ -71,7 +71,7 @@
     <!-- Docsify v4 -->
     <script src="_media/js/docsify@4.js"></script>
     <script src="_media/js/search.min.js"></script>
-    <script src="_media/js/countable.js"></script>
+    <!-- <script src="_media/js/countable.js"></script> -->
     <!-- CDN files for docsify-katex -->
     <script src="_media/js/docsify-katex.js"></script>
     <link rel="stylesheet" href="_media/css/katex.min.css" />
