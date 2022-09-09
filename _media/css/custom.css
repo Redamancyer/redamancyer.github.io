@@ -5,6 +5,9 @@ section.cover .cover-main {
     background-color: #fff;
 }
 
+footer{
+    margin: 15px auto;
+}
 hr {
     margin: 0 0;
 }
