@@ -1,5 +1,7 @@
 # CKAN: Collaborative Knowledge-aware Attentive Network for Recommender Systems
 
+> SIGIR ’20, July 25|Ze Wang、Guangyan Lin...|[源码链接](https://github.com/weberrr/CKAN)
+
 ## ABSTRACT
 
 知识图谱作为辅助信息在推荐系统中得到了广泛的研究和应用。然而，现有的基于知识属性的推荐方法大多关注于如何有效地对知识属性关联进行编码，而没有突出隐藏在用户-物品交互中的关键协同信号。因此，学习到的嵌入信息没有充分利用这两种关键信息，不能有效地表示用户和项目在向量空间中的潜在语义。本文提出了一种新的协作知识感知注意网络方法(Collaborative Knowledge-aware Attentive Network，CKAN)，用异质传播策略显式编码这两种信息，并使用知识感知的关注机制来区分不同知识邻居的贡献。
@@ -13,7 +15,7 @@ CKAN的设计有两种:
 
 ## 2 PROBLEM FORMULATION
 
-用户集合 $\mathcal{U}=\left\{u_{1}, u_{2}, \ldots, u_{M}\right\}$ ，物品集合$\mathcal{V}=\left\{v_{1}, v_{2}, \ldots, v_{N}\right\}$，用户-物品交互矩阵$\mathbf{Y} \in \mathbb{R}^{M \times N}$，知识图谱为$\mathcal{G}=\{(h, r, t) \mid h, t \in \mathcal{E}, r \in \mathcal{R}\}$，$\mathcal{A}=\{(v, \mathrm{e}) \mid v \in \mathcal{V}, \mathrm{e} \in \mathcal{E}\}$ 表示项目 $v$ 和知识图中的实体 $e$ 对齐。
+用户集合 $\mathcal{U}=\left\{u_{1}, u_{2}, \ldots, u_{M}\right\}$ ，物品集合$\mathcal{V}=\left\{v_{1}, v_{2}, \ldots, v_{N}\right\}$，用户-物品交互矩阵$\mathbf{Y} \in \mathbb{R}^{M \times N}$，知识图谱为$\mathcal{G}=\{(h, r, t) \mid h, t \in \mathcal{E}, r \in \mathcal{R}\}$，$\mathcal{A}=\{(v, \mathrm{e}) \mid v \in \mathcal{V}, \mathrm{e} \in \mathcal{E}\}$ 表示项目 v 和知识图中的实体 e 对齐。
 
 ## 3 METHODOLOGY
 
