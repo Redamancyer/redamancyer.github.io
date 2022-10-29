@@ -52,7 +52,7 @@
 
 其中R<sub>i</sub>∈R<sup>d×d</sup>和h<sub>i</sub>∈R<sup>d</sup>分别是关系r<sub>i</sub>和Head h<sub>i</sub>的嵌入。关联概率p<sub>i</sub>可以被认为是在关系Ri空间中测量的项v和实体h<sub>i</sub>的相似度。获得相关概率后，将$\mathcal{S}_{u}^{1}$中三元组的尾实体按相应的相关概率加权求和，得到用户兴趣经过第一轮扩散的结果：
 
-![MommyTalk1649420409729](_images/RippleNet/MommyTalk1649420409729.svg)
+![MommyTalk1667006661864](_images/RippleNet/MommyTalk1667006661864.svg)
 
 之后，将p<sub>i</sub>公式中的V换成o<sub>u</sub><sup>1</sup>后得到o<sub>u</sub><sup>2</sup>，将上述过程重复H次得到用户u的最终嵌入表示：
 
