@@ -222,3 +222,8 @@ h1 {
         box-shadow: 0 2.5em 0 0;
     }
 }
+
+.mermaid{
+    width: 100%;
+    text-align: center;
+}
