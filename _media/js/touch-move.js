@@ -48,11 +48,31 @@ var EventUtil = {
                     startY = event.touches[0].pageY;
                     break;
                 case "touchend":
-                    var tagName = event.srcElement.tagName.toLowerCase();
-                    // console.log(tagName)
-                    if (tagName.startsWith('code') || tagName.startsWith('svg')) {
-                        return;
+                    // var tagName = event.srcElement.tagName.toLowerCase();
+                    // // console.log(tagName)
+                    // if (tagName.startsWith('code') || tagName.startsWith('svg')) {
+                    //     return;
+                    // }
+
+                    //检查是否是code和svg的后代
+                    // 获取被点击的元素
+                    var clickedElement = event.target;
+
+                    // 判断是否点击了具有类名为 "lang-shell" 的 <code> 元素或其子孙节点
+                    var codeElement1 = clickedElement.closest('div.mermaid');
+                    if (codeElement1) {
+                        // 如果点击了符合条件的元素或其子孙节点
+                        // console.log('Clicked element is the desired <code> element or its descendant:', codeElement);
+                        return ;
                     }
+                    // 判断是否点击了具有类名为 "lang-shell" 的 <code> 元素或其子孙节点
+                    var codeElement = clickedElement.closest('code.lang-shell');
+                    if (codeElement) {
+                        // 如果点击了符合条件的元素或其子孙节点
+                        // console.log('Clicked element is the desired <code> element or its descendant:', codeElement);
+                        return ;
+                    }
+
 
                     //判断是否是主界面的元素
 
