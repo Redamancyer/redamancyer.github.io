@@ -48,11 +48,11 @@ var EventUtil = {
                     startY = event.touches[0].pageY;
                     break;
                 case "touchend":
-                    // var tagName = event.srcElement.tagName.toLowerCase();
-                    // // console.log(tagName)
-                    // if (tagName.startsWith('code') || tagName.startsWith('svg')) {
-                    //     return;
-                    // }
+                    var tagName = event.srcElement.tagName.toLowerCase();
+                    // console.log(tagName)
+                    if (tagName.startsWith('code') || tagName.startsWith('svg')) {
+                        return;
+                    }
 
                     //检查是否是code和svg的后代
                     // 获取被点击的元素
@@ -93,11 +93,11 @@ var EventUtil = {
 
                     if (Math.abs(spanX) > Math.abs(spanY)) {      //认定为水平方向滑动
                         var button = document.querySelector('.sidebar-toggle');
-                        if (spanX > 30 && isMain) {         //向右
+                        if (spanX > 30 && Math.abs(spanY)<10 && isMain) {         //向右
                             // console.log('right' )
                             // 触发按钮的点击事件
                             button.click();
-                        } else if (spanX < -30 && !isMain) { //向左
+                        } else if (spanX < -30 && Math.abs(spanY)<10 && !isMain) { //向左
                             // console.log('left')
                             button.click();
                         }
