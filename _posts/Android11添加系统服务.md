@@ -1,8 +1,8 @@
 # Android 11添加系统服务
 
-## 自定义系统Service
+## 1. 自定义系统Service
 
-### 定义接口
+### 1.1 定义接口
 
 定义了一个名为 `IDemoManager` 的 AIDL 接口，其中包含一个 `getString` 方法用于返回字符串。
 
@@ -18,7 +18,7 @@ interface IDemoManager {
 }
 ```
 
-### 编写代理类
+### 1.2 编写代理类
 
 Android系统中的ManagerService都是不可以直接访问的，需要通过它们的客户端代理类执行操作，我们也为我们的Service写一个代理类。
 
@@ -52,7 +52,7 @@ public class DemoManager {
 }
 ```
 
-### 编写系统服务
+### 1.3 编写系统服务
 
 ```Java
 //project/frameworks/base/services/core/java/com/android/server/demo/DemoManagerService.java
@@ -79,7 +79,7 @@ public class DemoManagerService extends IDemoManager.Stub {
 }
 ```
 
-### 注册服务
+### 1.4 注册服务
 
 ```Java
 //project/frameworks/base/core/java/android/app/SystemServiceRegistry.java
@@ -102,7 +102,7 @@ static{
 //...
 ```
 
-### 定义服务常量
+### 1.5 定义服务常量
 
 ```Java
 //project/frameworks/base/core/java/android/content/Context.java
@@ -123,7 +123,7 @@ public abstract class Context {
 //...
 ```
 
-### 添加服务
+### 1.6 添加服务
 
 ```Java
 //project/frameworks/base/services/java/com/android/server/SystemServer.java
@@ -140,7 +140,7 @@ mActivityManagerService.systemReady(() -> {
 
 
 
-## 编译源码
+## 2. 编译源码
 
 1. 初始化项目编译
 
@@ -155,7 +155,7 @@ mActivityManagerService.systemReady(() -> {
 
 
 
-## 调用服务
+## 3. 调用服务
 
 ```Java
 //mainActivity.java
@@ -171,9 +171,9 @@ try {
 }
 ```
 
-## 注意事项
+## 4. 注意事项
 
-### 关闭SElinux
+### 4.1 关闭SElinux
 
 为了快速调试，这里选择关闭SElinux，避免没有权限造成的无法调用。若不关闭，则配置安全权限。参考[Selinux权限解决](https://blog.csdn.net/qq_45649553/article/details/138523625#Selinux_341)
 
@@ -189,7 +189,7 @@ bool IsEnforcing() {
 
 
 
-## 调用流程
+## 5. 调用流程解析
 在这个调用过程中，`mainActivity` 通过 `ServiceManager` 获取名为 "demo" 的服务，获得一个代表远程服务接口的 `IBinder` 对象。随后，`mainActivity` 将该 `IBinder` 对象转换为 `IDemoManager` 接口对象，通过该代理对象调用 `getString()` 方法。代理对象通过 IPC 机制将请求发送到远程服务端的 `DemoManagerService`，执行相应逻辑后返回结果，最终由代理对象将结果传递给 `mainActivity`。
 
 ```mermaid
