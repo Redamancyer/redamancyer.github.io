@@ -1,11 +1,6 @@
 # Android Framework
-
-## 视频框架相关
+- [Android 11添加系统服务](_posts/Android11添加系统服务.md)
 - [MediaPlayer源码分析](_posts/MediaPlayer源码分析.md)
-
-
-## 音频框架相关
-
 
 ## 其他
 - [测试](_posts/测试.md)
