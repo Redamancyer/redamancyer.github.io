@@ -5,7 +5,7 @@ function initResizableSidebar() {
     let isResizing = false;
 
     sidebar.addEventListener('mousemove', function(e) {
-        if (e.offsetX > sidebar.clientWidth - 10) {
+        if (e.offsetX > sidebar.clientWidth - 15) {
             sidebar.style.cursor = 'ew-resize';
         } else {
             sidebar.style.cursor = 'default';
@@ -13,7 +13,7 @@ function initResizableSidebar() {
     });
 
     sidebar.addEventListener('mousedown', function(e) {
-        if (e.offsetX > sidebar.clientWidth - 10) {
+        if (e.offsetX > sidebar.clientWidth - 15) {
             isResizing = true;
         }
 
