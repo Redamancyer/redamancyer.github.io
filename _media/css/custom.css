@@ -109,6 +109,11 @@ h1 {
 .sidebar {
     z-index: 0;
 }
+@media (min-width: 1024px) {
+    .sidebar-toggle-button {
+        display: none; /* 在大屏幕设备上隐藏 */
+    }
+}
 
 #popup {
     position: fixed;
