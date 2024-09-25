@@ -5,11 +5,11 @@
 播放器的创建追溯到MediaPlayer源码分析中的`MediaPlayerService::Client::setDataSource`：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
+//frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
 status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64_t length)
 {
-		// 省略资源判断代码
-		// 通过评分机制获取播放器类型
+    // 省略资源判断代码
+    // 通过评分机制获取播放器类型
     player_type playerType = MediaPlayerFactory::getPlayerType(this,fd,offset,length);
     // 根据前面获得的播放器类型创建播放器对象。
     sp<MediaPlayerBase> p = setDataSource_pre(playerType);
@@ -26,9 +26,8 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
 ## MediaPlayerService/Client/setDataSource_pre
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
-sp<MediaPlayerBase> MediaPlayerService::Client::setDataSource_pre(
-        player_type playerType)
+//frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
+sp<MediaPlayerBase> MediaPlayerService::Client::setDataSource_pre(player_type playerType)
 {
     ALOGV("player type = %d", playerType);
 
@@ -39,8 +38,7 @@ sp<MediaPlayerBase> MediaPlayerService::Client::setDataSource_pre(
     }
     // 删掉了大量注册服务监听的代码，包括extractor、IOMX
     if (!p->hardwareOutput()) {// 播放器音频是否通过硬件直接输出，NuPlayer是不需要的，因此需要执行。
-        mAudioOutput = new AudioOutput(mAudioSessionId, mAttributionSource,
-                mAudioAttributes, mAudioDeviceUpdatedListener);
+        mAudioOutput = new AudioOutput(mAudioSessionId, mAttributionSource, mAudioAttributes, mAudioDeviceUpdatedListener);
         static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
     }
     return p;
@@ -50,7 +48,7 @@ sp<MediaPlayerBase> MediaPlayerService::Client::setDataSource_pre(
 ### MediaPlayerService/Client/createPlayer
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
+//frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
 sp<MediaPlayerBase> MediaPlayerService::Client::createPlayer(player_type playerType)
 {
     // 检查当前进程，是否已经有一个播放器不同类型的播放器了，如果有，干掉它。
@@ -74,7 +72,7 @@ sp<MediaPlayerBase> MediaPlayerService::Client::createPlayer(player_type playerT
 #### MediaPlayerFactory/createPlayer
 
 ```cpp
-frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
+//frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
 sp<MediaPlayerBase> MediaPlayerFactory::createPlayer(
         player_type playerType,
         const sp<MediaPlayerBase::Listener> &listener,
@@ -117,7 +115,7 @@ sp<MediaPlayerBase> MediaPlayerFactory::createPlayer(
 先来看看`sFactoryMap`是个什么东西：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.h
+//frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.h
 class MediaPlayerFactory {
   private:
       typedef KeyedVector<player_type, IFactory*> tFactoryMap;
@@ -130,7 +128,7 @@ class MediaPlayerFactory {
 ##### NuPlayerFactory/createPlayer
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
+//frameworks/av/media/libmediaplayerservice/MediaPlayerFactory.cpp
 class NuPlayerFactory : public MediaPlayerFactory::IFactory {
   public:
   // 删掉了评分机制的代码
@@ -147,7 +145,7 @@ class NuPlayerFactory : public MediaPlayerFactory::IFactory {
 ###### NuPlayerDriver/NuPlayerDriver
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
 NuPlayerDriver::NuPlayerDriver(pid_t pid)
     : mState(STATE_IDLE),// 将播放器状态设置为空闲
       mIsAsyncPrepare(false),
@@ -175,11 +173,7 @@ NuPlayerDriver::NuPlayerDriver(pid_t pid)
     mMediaClock->init();
     // set up an analytics record
     mMetricsItem = mediametrics::Item::create(kKeyPlayer);
-    mLooper->start(
-            false, /* runOnCallingThread */
-            true,  /* canCallJava */
-            PRIORITY_AUDIO);
-
+    mLooper->start(false, /* runOnCallingThread */ true,  /* canCallJava */ PRIORITY_AUDIO);
     mLooper->registerHandler(mPlayer);
     mPlayer->init(this);// 将NuPlayerDriver设置给NuPlayer，让NuPlayer持有NuPlayerDriver的引用。
 }
@@ -192,7 +186,7 @@ NuPlayerDriver::NuPlayerDriver(pid_t pid)
 再回到`MediaPlayerFactory::createPlayer`中，接下来是`initCheck()`部分：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
 status_t NuPlayerDriver::initCheck() {
     return OK;
 }
@@ -203,8 +197,7 @@ status_t NuPlayerDriver::initCheck() {
 
 ```c++
 if (!p->hardwareOutput()) {// 播放器音频是否通过硬件直接输出，NuPlayer是不需要的，因此需要执行。
-    mAudioOutput = new AudioOutput(mAudioSessionId, mAttributionSource,
-            mAudioAttributes, mAudioDeviceUpdatedListener);
+    mAudioOutput = new AudioOutput(mAudioSessionId, mAttributionSource, mAudioAttributes, mAudioDeviceUpdatedListener);
     static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
 }
 ```
@@ -212,7 +205,7 @@ if (!p->hardwareOutput()) {// 播放器音频是否通过硬件直接输出，Nu
 ### NuPlayerDriver/setAudioSink
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
 void NuPlayerDriver::setAudioSink(const sp<AudioSink> &audioSink) {
     Mutex::Autolock autoLock(mAudioSinkLock);
     mPlayer->setAudioSink(audioSink);// mPlayer为刚才创建的NuPlayer对象
@@ -226,7 +219,7 @@ void NuPlayerDriver::setAudioSink(const sp<AudioSink> &audioSink) {
 #### NuPlayer/setAudioSink
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
 void NuPlayer::setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink) {
     sp<AMessage> msg = new AMessage(kWhatSetAudioSink, this);
     msg->setObject("sink", sink);
@@ -254,7 +247,7 @@ case kWhatSetAudioSink:
 ## MediaPlayerService/Client/setDataSource_post
 
 ```c++
-frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
+//frameworks/av/media/libmediaplayerservice/MediaPlayerService.cpp
 status_t MediaPlayerService::Client::setDataSource_post(
         const sp<MediaPlayerBase>& p,
         status_t status)
@@ -284,7 +277,7 @@ status_t MediaPlayerService::Client::setDataSource_post(
 ### NuPlayerDriver/setDataSource
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
 status_t NuPlayerDriver::setDataSource(int fd, int64_t offset, int64_t length) {
     ALOGV("setDataSource(%p) file(%d)", this, fd);
     Mutex::Autolock autoLock(mLock);
@@ -307,14 +300,13 @@ status_t NuPlayerDriver::setDataSource(int fd, int64_t offset, int64_t length) {
 继续跟踪`setDataSourceAsync`函数：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
 void NuPlayer::setDataSourceAsync(int fd, int64_t offset, int64_t length) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, this);// 新建消息，这属于常规操作了
     sp<AMessage> notify = new AMessage(kWhatSourceNotify, this);// 新建消息，用于和解封装模块通信，类似于一种listener的功能
     sp<GenericSource> source = 
       new GenericSource(notify, mUIDValid, mUID, mMediaClock);// 创建解封装器
-    ALOGV("setDataSourceAsync fd %d/%lld/%lld source: %p",
-            fd, (long long)offset, (long long)length, source.get());
+    ALOGV("setDataSourceAsync fd %d/%lld/%lld source: %p", fd, (long long)offset, (long long)length, source.get());
     status_t err = source->setDataSource(fd, offset, length);// 为GenericSource设置媒体源
     if (err != OK) {
         ALOGE("Failed to set data source!");
@@ -336,7 +328,7 @@ void NuPlayer::setDataSourceAsync(int fd, int64_t offset, int64_t length) {
 创建了一个解封装格式的解析器后，将结果`post`到`NuPlayer::onMessageReceived`函数处理：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
 void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
         case kWhatSetDataSource:
@@ -367,7 +359,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 ###### NuPlayerDriver/notifySetDataSourceCompleted
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
 void NuPlayerDriver::notifySetDataSourceCompleted(status_t err) {
     Mutex::Autolock autoLock(mLock);
     CHECK_EQ(mState, STATE_SET_DATASOURCE_PENDING);// 当前mState为STATE_SET_DATASOURCE_PENDING
@@ -377,7 +369,7 @@ void NuPlayerDriver::notifySetDataSourceCompleted(status_t err) {
 }
 ```
 
-释放锁后，`NuPlayerDriver::setDataSource`会将执行的结果`mAsyncResult`返回给调用者。`setDataSource`流程执行完毕。最后是调用`setDataSource_post(p, p->setDataSource(fd, offset, length));`
+释放锁后，`NuPlayerDriver::setDataSource`会将执行的结果`mAsyncResult`返回给调用者。`setDataSource`流程执行完毕。
 
 # 时序图整理
 
@@ -445,7 +437,7 @@ deactivate Client
 
 ```
 
-# 相关参考
+# 参考文献
 
 - [NuPlayer源码分析一：播放器创建](https://blog.csdn.net/qq_25333681/article/details/90354268)
 
