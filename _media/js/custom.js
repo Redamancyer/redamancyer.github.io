@@ -5,7 +5,7 @@ function initResizableSidebar() {
     let isResizing = false;
 
     sidebar.addEventListener('mousemove', function(e) {
-        if (e.offsetX > sidebar.clientWidth - 15) {
+        if (e.offsetX > sidebar.clientWidth - 5) {
             sidebar.style.cursor = 'ew-resize';
         } else {
             sidebar.style.cursor = 'default';
@@ -13,13 +13,15 @@ function initResizableSidebar() {
     });
 
     sidebar.addEventListener('mousedown', function(e) {
-        if (e.offsetX > sidebar.clientWidth - 15) {
+        document.body.style.userSelect = 'none'; // 禁用文本选择
+        if (e.offsetX > sidebar.clientWidth - 5) {
             isResizing = true;
         }
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', function() {
             isResizing = false;
+            document.body.style.userSelect = ''; // 启用文本选择
             document.removeEventListener('mousemove', onMouseMove);
         });
     });
