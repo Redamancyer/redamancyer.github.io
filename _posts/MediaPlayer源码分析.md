@@ -526,17 +526,49 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
 
 这里通过分离器来确定数据源中是音频还是视频，然后对 player 的 videotrack 和 audiotrack 进行相对应的设置。
 
-到此为止 setDataSource 的流程就算是走完了，如果继续往下分析的话就到了视频的编解码的知识了。下面先用几张图来梳理一下这个过程（画的不是很规范）。
+到此为止 setDataSource 的流程就算是走完了。总结一下简单的时序图。
 
-**流程图：**
+```mermaid
+sequenceDiagram
+MediaPlayer.java->> + android_media_MediaPlayer.cpp: _setDataSource
+Note right of MediaPlayer.java: JNI函数映射
+android_media_MediaPlayer.cpp->> - mediaplayer.cpp:getMediaPlayer
+activate mediaplayer.cpp
+mediaplayer.cpp->>mediaplayer.cpp:get inited MediaPlayer()
+activate mediaplayer.cpp
+mediaplayer.cpp->>mediaplayer.cpp:setDataSource
+activate mediaplayer.cpp
+mediaplayer.cpp->> + ServiceManager:IPC
+deactivate mediaplayer.cpp
+deactivate mediaplayer.cpp
+deactivate mediaplayer.cpp
+ServiceManager->> - MediaPlayerService.cpp:getService('media.player')
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp->> MediaPlayerService.cpp:new Client
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp->> MediaPlayerService.cpp:setDataSource
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp->> + MediaPlayerFactory.cpp:getPlayerType
+MediaPlayerFactory.cpp-->> - MediaPlayerService.cpp:playerType
+MediaPlayerService.cpp->> MediaPlayerService.cpp:setDataSource_pre(playerType)
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp->> MediaPlayerService.cpp:createPlayer(playerType)
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp->> + MediaPlayerFactory.cpp:createPlayer
+Note right of MediaPlayerService.cpp: 打分机制
+MediaPlayerFactory.cpp-->> - NuPlayer.cpp:new NuPlayer()
+deactivate MediaPlayerService.cpp
+deactivate MediaPlayerService.cpp
+MediaPlayerService.cpp->> MediaPlayerService.cpp:setDataSource_post
+activate MediaPlayerService.cpp
+MediaPlayerService.cpp-->> NuPlayer.cpp:setDataSource
+NuPlayer.cpp-->>MediaPlayerService.cpp:status
+deactivate MediaPlayerService.cpp
+deactivate MediaPlayerService.cpp
+deactivate MediaPlayerService.cpp
+deactivate MediaPlayerService.cpp
 
-![setDataSource流程图](http://7xisp0.com1.z0.glb.clouddn.com/mediaplayer_set_data_flow.png)
-
-**类图：**
-
-![mediaplayer 类图](http://7xisp0.com1.z0.glb.clouddn.com/mediaplayer_class_diagram.png)
-
-类图中的 Client 是 MediaPlayerService 的内部类。MediaPlayerService 通过 IPC 和 MediaPlayerService 通信获得 Client，Client 中包含了 StagefrightPlayer，而 StagefrightPlayer 最终通过调用 AwesomePlayer 对应的方法。
+```
 
 ### 3.3 Prepare
 
@@ -880,3 +912,11 @@ MediaPlayer 整体上的流程就是这些，其中相对复杂的地方集中�
 [Media](https://source.android.com/devices/media/index.html)
 
 [深入理解 Android I](http://wiki.jikexueyuan.com/project/deep-android-v1/binder.html)
+
+[Android MediaPlayer源码分析](https://blog.csdn.net/k663514387/article/details/110622681)
+
+[MediaPlayer源码分析](https://blog.csdn.net/qq_25333681/article/details/82056184?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522875F76B4-5DC6-4C71-A27A-7D483FA2B799%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=875F76B4-5DC6-4C71-A27A-7D483FA2B799&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-82056184-null-null.142^v100^pc_search_result_base5&utm_term=mediaplayer%E6%BA%90%E7%A0%81&spm=1018.2226.3001.4187)
+
+[Android的MediaPlayer架构介绍](https://blog.csdn.net/chen_chun_guang/article/details/6997483)
+
+[MediaPlayer-MediaPlayerService-MediaPlayerService Client的三角](https://blog.csdn.net/hddghhfd/article/details/87608421?ops_request_misc=&request_id=&biz_id=102&utm_term=%E6%91%98%E8%A6%81%EF%BC%9A1.MediaPlayer%20%E6%98%AF%E5%AE%A2%E6%88%B7%E7%AB%AF2.MediaPl&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-87608421.142^v100^pc_search_result_base5&spm=1018.2226.3001.4187)
