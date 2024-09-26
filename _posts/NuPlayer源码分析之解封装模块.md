@@ -643,6 +643,7 @@ void NuPlayer::GenericSource::resume() {
 停止、暂停、恢复几个动作，相关函数中仅是改变mStarted，其它几乎什么事情都没做。所以，不管是停止、暂停还是回复的函数，关键都不在函数本身，而在于mStarted变量对于向外提供数据的函数的影响，也就是`dequeueAccessUnit`。该函数在播放过程中扮演着关键的角色，负责从媒体源中提取、准备和传递媒体数据单元，为音频和视频的解码和播放提供必要的支持。
 
 ```c++
+//frameworks/av/media/libmediaplayerservice/nuplayer/GenericSource.cpp
 status_t NuPlayer::GenericSource::dequeueAccessUnit(
         bool audio, sp<ABuffer> *accessUnit) {
     Mutex::Autolock _l(mLock);
