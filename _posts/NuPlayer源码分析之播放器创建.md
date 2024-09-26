@@ -371,7 +371,7 @@ void NuPlayerDriver::notifySetDataSourceCompleted(status_t err) {
 
 释放锁后，`NuPlayerDriver::setDataSource`会将执行的结果`mAsyncResult`返回给调用者。`setDataSource`流程执行完毕。
 
-# 时序图整理
+# 总结
 
 最后总结一下简单的调用时序图，本篇结束撒花🎉。请看下一篇[NuPlayer源码分析之解封装模块](_posts/NuPlayer源码分析之解封装模块.md)
 
