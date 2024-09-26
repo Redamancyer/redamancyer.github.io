@@ -232,3 +232,11 @@ h1 {
     width: 100%;
     text-align: center;
 }
+
+/*设置文本高亮*/
+p:has(span.mark) {
+    background-color: yellow;
+    line-height: 3;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
