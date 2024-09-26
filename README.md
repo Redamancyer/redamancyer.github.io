@@ -5,6 +5,7 @@
 - [Android 11添加系统服务](_posts/Android11添加系统服务.md)
 - [MediaPlayer源码分析](_posts/MediaPlayer源码分析.md)
 - [NuPlayer源码分析之播放器创建](_posts/NuPlayer源码分析之播放器创建.md)
+- [NuPlayer源码分析之解封装模块](_posts/NuPlayer源码分析之解封装模块.md)
 
 ## 其他
 
