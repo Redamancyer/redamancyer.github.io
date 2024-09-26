@@ -252,7 +252,7 @@ if ( property_get_bool( "media.stagefright.extractremote", true ) &&!PlayerServi
 }
 ```
 
-这里是基本的系统服务调用，不懂的可以去看[Android 11添加系统服务](_posts/Android 11添加系统服务.md)。可以来深入一下这个服务干了啥，先看makeIDataSource：
+这里是基本的系统服务调用，不懂的可以去看[Android 11添加系统服务](Android 11添加系统服务.md)。可以来深入一下这个服务干了啥，先看makeIDataSource：
 
 ```c++
 //frameworks/av/services/mediaextractor/MediaExtractorService.cpp
