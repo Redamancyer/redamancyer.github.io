@@ -656,7 +656,7 @@ status_t NuPlayer::GenericSource::dequeueAccessUnit(
 
 # 总结
 
-最后总结一下简单的调用时序图，本篇结束撒花🎉。请看下一篇[NuPlayer源码分析之解码模块](NuPlayer源码分析之解码模块.md)
+最后总结一下简单的调用时序图，本篇结束撒花🎉。请看下一篇[NuPlayer源码分析之解码模块](NuPlayer源码分析之解码模块.md)。
 
 ```mermaid
 sequenceDiagram
