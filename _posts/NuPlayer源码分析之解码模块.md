@@ -5,6 +5,7 @@
 解码器创建的入口在NuPlayer的`NuPlayer::instantiateDecoder`，调用关系为`NuPlayer::OnStart` => `postScanSources` => `instantiateDecoder`。本文从`instantiateDecoder`这个函数开始分析：
 
 ```c++
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayer.cpp
 status_t NuPlayer::instantiateDecoder(bool audio, sp<DecoderBase> *decoder, bool checkAudioModeChange)
 {
     /* 检查是否已经存在解码器或者音频正在被停止，如果是则直接返回OK */
@@ -60,7 +61,7 @@ status_t NuPlayer::instantiateDecoder(bool audio, sp<DecoderBase> *decoder, bool
 接下来看解码器的构造函数：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
 NuPlayer::Decoder::Decoder(
         const sp<AMessage> &notify,
         const sp<Source> &source,
@@ -90,7 +91,7 @@ NuPlayer::Decoder::Decoder(
 再来看看关于解码器的第二个操作：`(*decoder)->init();`，这里发现`Decoder`中并没有`init`函数，所以要向上去找。由于`Decoder`继承于`DecoderBase`，很快可以从中找到`init`：
 
 ```
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoderBase.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoderBase.cpp
 void NuPlayer::DecoderBase::init() {
     mDecoderLooper->registerHandler(this);
 }
@@ -99,7 +100,7 @@ void NuPlayer::DecoderBase::init() {
 这里的`mDecoderLooper`的创建是在`DecoderBase`的构造函数中：
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoderBase.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoderBase.cpp
 NuPlayer::DecoderBase::DecoderBase(const sp<AMessage> &notify)
     :  mNotify(notify),
        mBufferGeneration(0),
@@ -118,10 +119,10 @@ NuPlayer::DecoderBase::DecoderBase(const sp<AMessage> &notify)
 
 ### NuPlayer/Decoder/onConfigure
 
-再回到`instantiateDecoder`中，来看看和解码相关的最重要的一步操作：`(*decoder)->configure(format);`。同理`configure`方法也是在`DecoderBase`中的，但是会通过`DecoderBase::configure`=>`DecoderBase::Onconfigure`=>`Decoder::onConfigure`调用链回到`Decoder`中去。
+再回到`instantiateDecoder`中，来看看和解码相关的最重要的一步操作：`(*decoder)->configure(format);`。同理`configure`方法也是在`DecoderBase`中的，但是会通过`DecoderBase::configure`=>`DecoderBase::onconfigure`=>`Decoder::onConfigure`调用链回到`Decoder`中去。
 
 ```c++
-frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
 void NuPlayer::Decoder::onConfigure(const sp<AMessage> &format)
 {
     //...
@@ -138,5 +139,124 @@ void NuPlayer::Decoder::onConfigure(const sp<AMessage> &format)
 }
 ```
 
-从简化后的代码可以看到， 在`onConfigure`函数中，有关`MediaCodec`的调用都是比较经典的调用方式。分别有，`MediaCodec`的创建、配置、设置回调通知、启动解码器。
+从简化后的代码可以看到， 在`onConfigure`函数中，有关`MediaCodec`的调用都是比较经典的调用方式。分别有，`MediaCodec`的创建、配置、设置回调通知、启动解码器。自此`MediaCodec`就被创建并启动了，后面详细学`MediaCodec`会专门出一期关于它的工作流程。接下来看下`MediaCodec`被启动后经过回调`Decoder`不断地填充数据到解码队列。回调的调用链是**MediaCodec**=>**onMessageReceived**=>**handleAnInputBuffer**=>**onInputBufferFetched**。
 
+```c++
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
+bool NuPlayer::Decoder::onInputBufferFetched(const sp<AMessage> &msg) {
+    //...
+    bool hasBuffer = msg->findBuffer("buffer", &buffer);// 填充通解封装模块获取的数据
+    bool needsCopy = true;// 是否需要将数据拷贝给MediaCodec
+
+    if (buffer == NULL) {
+		// 没有buffer了...
+    } else {
+        //...
+        // 复制到解码器缓冲区
+        if (needsCopy) {
+              //...
+              if (buffer->data() != NULL) {
+                  codecBuffer->setRange(0, buffer->size());
+                  memcpy(codecBuffer->data(), buffer->data(), buffer->size());
+              } 
+          		//...
+            } // buffer->data()
+        } // needsCopy
+
+        status_t err;
+        AString errorDetailMsg;
+        if (cryptInfo != NULL) {
+            err = mCodec->queueSecureInputBuffer(// 将buffer加入到MediaCodec的待解码队列中
+                    bufferIx,
+                    codecBuffer->offset(),
+                    cryptInfo->subSamples,
+                    cryptInfo->numSubSamples,
+                    cryptInfo->key,
+                    cryptInfo->iv,
+                    cryptInfo->mode,
+                    cryptInfo->pattern,
+                    timeUs,
+                    flags,
+                    &errorDetailMsg);
+            // 同步调用，因此在此处处理cryptInfo
+            free(cryptInfo);
+        }
+  		  //...
+    }   // buffer != NULL
+    return true;
+}
+```
+
+这个函数的核心，就是调用`MediaCodec`的`queueInputBuffer`函数，将填充好的`MediaCodecBuffer`添加到`MediaCodec`的输入队列中，等待解码。
+
+## NuPlayer/Decoder/onRenderBuffer
+
+`MediaCodec`将输入队列中的数据解码后放入输出队列，`Decoder`通过执行对应的回调函数`onRenderBuffer`来渲染数据。在`NuPlayer::Decoder`中回调函数执行链条为：**onMessageReceived** => **handleAnOutputBuffer** => **onRenderBuffer**。
+
+==注意：**onRenderBuffer**和**onInputBufferFetched**的执行几乎是同时的。==
+
+```c++
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
+void NuPlayer::Decoder::onRenderBuffer(const sp<AMessage> &msg) {
+    //...
+    if (msg->findInt32("render", &render) && render) {
+        int64_t timestampNs;
+        CHECK(msg->findInt64("timestampNs", &timestampNs));
+        err = mCodec->renderOutputBufferAndRelease(bufferIx, timestampNs);// 触发播放音频数据
+    } else {
+        if (!msg->findInt32("eos", &eos) || !eos ||
+                !msg->findSize("size", &size) || size) {
+            mNumOutputFramesDropped += !mIsAudio;
+        }
+        err = mCodec->releaseOutputBuffer(bufferIx);// 播放视频数据
+    }
+    //...
+}
+```
+## NuPlayer/Decoder/~Decoder
+
+关于渲染逻辑和音视频同步不是本篇的重点内容，将在下篇中展开。最后看下解码器的释放。
+
+```c++
+//frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
+NuPlayer::Decoder::~Decoder() {
+    stopLooper();// 停止looper
+    if (mCodec != NULL) {
+        mCodec->release();// release掉MediaCodec
+    }
+    releaseAndResetMediaBuffers();// 清理buffer
+}
+```
+
+# 总结
+
+最后总结一下简单的调用时序图，本篇结束撒花🎉。请看下一篇[NuPlayer源码分析之渲染和同步模块](NuPlayer源码分析之渲染和同步模块.md)。
+
+```mermaid
+sequenceDiagram
+NuPlayer->>Decoder:new
+Decoder->>DecoderBase:init
+Decoder->>DecoderBase:configure
+Decoder-->> + DecoderBase:onconfigure
+DecoderBase->> - Decoder:onConfigure
+Decoder->> + MediaCodec:CreateByType
+MediaCodec-->> - Decoder:mCodec
+Decoder->>MediaCodec:configure
+Decoder->>MediaCodec:setCallback
+Decoder->> + MediaCodec:start
+MediaCodec-->> - Decoder:onInputBufferFetched
+activate Decoder
+Decoder->>Decoder:memcpy
+Decoder->>MediaCodec:queueSecureInputBuffer
+deactivate Decoder
+MediaCodec -->> + Decoder:onRenderBuffer
+Decoder->> - MediaCodec:releaseOutputBuffer
+Decoder->>+ Decoder:~Decoder
+Decoder->> - MediaCodec:release
+```
+
+# 参考文献
+
+[NuPlayer源码分析三：解码模块](https://blog.csdn.net/qq_25333681/article/details/90614231)
+
+Android 音视频开发_何俊林.pdf中的5.4 NuPlayer的解码模块
