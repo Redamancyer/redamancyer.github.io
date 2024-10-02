@@ -1,5 +1,7 @@
 # NuPlayer源码分析之解码模块
 
+> 本文内容的源码全摘录自[android14-qpr3-release](https://cs.android.com/android/platform/superproject/+/android14-qpr3-release:)，悉知！
+
 ## NuPlayer/instantiateDecoder
 
 解码器创建的入口在NuPlayer的`NuPlayer::instantiateDecoder`，调用关系为`NuPlayer::OnStart` => `postScanSources` => `instantiateDecoder`。本文从`instantiateDecoder`这个函数开始分析：
@@ -26,6 +28,9 @@ status_t NuPlayer::instantiateDecoder(bool audio, sp<DecoderBase> *decoder, bool
     if (audio)
     {// 如果是音频
         sp<AMessage> notify = new AMessage(kWhatAudioNotify, this);
+        if (checkAudioModeChange) {
+            determineAudioModeChange(format);// 初始化并启动AudioSink
+        }
         //...
         *decoder = new DecoderPassThrough(notify, mSource, mRenderer);
         //...
@@ -139,7 +144,7 @@ void NuPlayer::Decoder::onConfigure(const sp<AMessage> &format)
 }
 ```
 
-从简化后的代码可以看到， 在`onConfigure`函数中，有关`MediaCodec`的调用都是比较经典的调用方式。分别有，`MediaCodec`的创建、配置、设置回调通知、启动解码器。自此`MediaCodec`就被创建并启动了，后面详细学`MediaCodec`会专门出一期关于它的工作流程。接下来看下`MediaCodec`被启动后经过回调`Decoder`不断地填充数据到解码队列。回调的调用链是**MediaCodec**=>**onMessageReceived**=>**handleAnInputBuffer**=>**onInputBufferFetched**。
+从简化后的代码可以看到， 在`onConfigure`函数中，有关`MediaCodec`的调用都是比较经典的调用方式。分别有，`MediaCodec`的创建、配置、设置回调通知、启动解码器。自此`MediaCodec`就被创建并启动了，后面详细学`MediaCodec`会专门出一期关于它的工作流程。接下来看下`MediaCodec`被启动后经过回调`Decoder`不断地填充数据到解码队列。回调的调用链是**onMessageReceived**=>**handleAnInputBuffer**=>**onInputBufferFetched**。
 
 ```c++
 //frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDecoder.cpp
