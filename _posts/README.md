@@ -7,6 +7,7 @@
 - [NuPlayer源码分析之播放器创建](NuPlayer源码分析之播放器创建.md)
 - [NuPlayer源码分析之解封装模块](NuPlayer源码分析之解封装模块.md)
 - [NuPlayer源码分析之解码模块](NuPlayer源码分析之解码模块.md)
+- [NuPlayer源码分析之渲染和同步模块](NuPlayer源码分析之渲染和同步模块.md)
 
 ## 其他
 
