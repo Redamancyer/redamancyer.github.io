@@ -2,7 +2,7 @@
 
 ## MediaPlayer 调用流程
 
-MediaPlayer中涉及到的主要函数都是通过 JNI 来完成的，MediaPlayer.java 对应的是 [android_media_MediaPlayer.cpp](https://android.googlesource.com/platform/frameworks/base/+/android-5.1.1_r18/media/jni/android_media_MediaPlayer.cpp)。其中的对应关系如下，省略了一部分不是特别重要的。
+MediaPlayer中涉及到的主要函数都是通过 JNI 来完成的，MediaPlayer.java 对应的是android_media_MediaPlayer.cpp。其中的对应关系如下，省略了一部分不是特别重要的。
 
 ```cpp
 static JNINativeMethod gMethods[] = {
@@ -60,29 +60,33 @@ public MediaPlayer() {
 setup 方法中创建了 MediaPlayer，同时也设置了回调函数。其中最后一行的 setMediaPlayer 将 MediaPlayer 的指针保存成一个 Java 对象，之后可以看到 getMediaPlayer 通过同样的方法获取到该对象的指针。
 
 ```cpp
-static void
-android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
-
+static void android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
+                                       jobject jAttributionSource,
+                                       jint jAudioSessionId)
 {
     ALOGV("native_setup");
-    sp<MediaPlayer> mp = new MediaPlayer();
+    Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
+    android::content::AttributionSourceState attributionSource;
+    attributionSource.readFromParcel(parcel);
+    sp<MediaPlayer> mp = sp<MediaPlayer>::make(
+        attributionSource, static_cast<audio_session_t>(jAudioSessionId));
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
     }
+
     // create new listener and give it to MediaPlayer
     sp<JNIMediaPlayerListener> listener = new JNIMediaPlayerListener(env, thiz, weak_this);
     mp->setListener(listener);
+
     // Stow our new C++ MediaPlayer in an opaque field in the Java object.
     setMediaPlayer(env, thiz, mp);
-
 }
 
 static sp<MediaPlayer> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<MediaPlayer>& player)
 {
     Mutex::Autolock l(sLock);
-    /* 由于指针的大小和 long 的大小是一样的，所以这里的 get 和 set 可以将
-       MediaPlayer 的指针取出或存入*/
+    /* 由于指针的大小和 long 的大小是一样的，所以这里的 get 和 set 可以将MediaPlayer 的指针取出或存入*/
     sp<MediaPlayer> old = (MediaPlayer*)env->GetLongField(thiz, fields.context);
     // 判断 mediaplayer 是否为空指针，如果不是，这 sp 引用计数加1
     if (player.get()) {
@@ -102,33 +106,29 @@ static sp<MediaPlayer> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<MediaP
 
 ### 设置数据源
 
-[setDataSource](https://developer.android.com/reference/android/media/MediaPlayer.html#setDataSource%28java.io.FileDescriptor%29) 对应的是 jni 中的这个函数：
+setDataSource对应的是 jni 中的这个函数：
 
 ```cpp
 static void android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    // mediaplayer 为空
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    // 文件描述符为空
+
     if (fileDescriptor == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     ALOGV("setDataSourceFD: fd %d", fd);
-    // 调用 mp->setDataSource(fd, offset, length) 为 mediaplayer 设置数据源
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
 }
 
 ```
 
-可以看到函数开始先做了空指针的判断，之后调用了 mp->setDataSource(fd, offset, length) 方法来给 mediaplayer 设置数据源，同时 process_media_player_call 函数对 setDataSource 返回值做判断是否设置成功以及失败后抛出异常。
-
-mediaplayer 中的 setDataSource 函数分为三种，分别对应播放文件、网络和流三种情况，现在只看播放文件的情况：
+可以看到函数开始先做了空指针的判断，之后调用了 mp->setDataSource(fd, offset, length) 方法来给 mediaplayer 设置数据源，同时 process_media_player_call 函数对 setDataSource 返回值做判断是否设置成功以及失败后抛出异常。mediaplayer 中的 setDataSource 函数分为三种，分别对应播放本地文件、网络和流三种情况，现在只看播放本地文件的情况：
 
 ```cpp
 status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
@@ -190,7 +190,7 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
 
 IServiceManager 是 IInterface 类型，和用 AIDL 生成的接口相同，IInterface 中包含了 binder 和 remote 两个东西。在 ndk 中对应的是 BnInterface 和 BpInterface。在 Java 中，本地 Client 通过 ServiceConnection 中的 onServiceConnected (ComponentName name, IBinder service) 方法获得 Service 中在 onBind 时候返回的 binder，同理，这里通过 ServiceManager 的 getService 获得和 media.player 这个 Service 通信用的 binder。
 
-到这里为止我们只拿到了 media.player Service 的 binder，要想调用接口中的方法还需要通过 asInterface 方法来获得与之对应的 IInterface 接口。这里的 interface_cast<IMediaPlayerService>(binder) 方法就可以获得对应的接口，那么 [interface_cast](https://android.googlesource.com/platform/frameworks/native/+/jb-mr1-dev/include/binder/IInterface.h) 是怎么做到的呢，其实很简单，利用了模板封装了 asInterface 的操作：
+到这里为止我们只拿到了 media.player Service 的 binder，要想调用接口中的方法还需要通过 asInterface 方法来获得与之对应的 IInterface 接口。这里的 interface_cast<IMediaPlayerService>(binder) 方法就可以获得对应的接口，那么 interface_cast 是怎么做到的呢，其实很简单，利用了模板封装了 asInterface 的操作：
 
 ```cpp
 template<typename INTERFACE> inline sp<INTERFACE> interface_cast(const sp<IBinder>& obj)
@@ -199,7 +199,7 @@ template<typename INTERFACE> inline sp<INTERFACE> interface_cast(const sp<IBinde
 }
 ```
 
-现在我们就拿到了 media.player Service 的接口。看到这里会有一个疑问，这个 media.player 的 Service 是什么时候启动的呢。我们根据 media.player 这个线索找到了下面的代码：
+现在我们就拿到了 media.player 的Service 的接口。看到这里会有一个疑问，这个 media.player 的 Service 是什么时候启动的呢。我们根据 media.player 这个线索找到了下面的代码：
 
 ```cpp
 
@@ -229,11 +229,11 @@ int main(int argc __unused, char** argv)
 
 ```
 
-其中 MediaPlayerService 位于 [MediaPlayerService.cpp](https://android.googlesource.com/platform/frameworks/av/+/android-5.1.1_r18/media/libmediaplayerservice/MediaPlayerService.cpp) 中，而 main 函数位于 [main_mediaserver.cpp](https://android.googlesource.com/platform/frameworks/av/+/android-5.1.1_r18/media/mediaserver/main_mediaserver.cpp)。它是在开机的时候启动的，被写在了启动脚本中。这样在系统启动的时候这个进程就开启了，同时里面的 Service 也就启动了。
+其中 MediaPlayerService 位于 MediaPlayerService.cpp 中，而 main 函数位于main_mediaserver.cpp。它是在开机的时候启动的，被写在了启动脚本中。这样在系统启动的时候这个进程就开启了，同时里面的 Service 也就启动了。
 
 #### 获取 MediaPlayer 接口
 
-service->create(this, mAudioSessionId) 方法通过 IPC 的方式调用 [MediaPlayerService](https://android.googlesource.com/platform/frameworks/av/+/android-5.1.1_r18/media/libmediaplayerservice/MediaPlayerService.cpp) 中的 create 方法获得 [IMediaPlayer](https://android.googlesource.com/platform/frameworks/av/+/master/media/libmedia/IMediaPlayer.cpp)，IMediaPlayer 从名字就可以看出是一个 IInterface，所以 MediaPlayer 也是通过 IPC 来调用的。先看这个方法做了什么：
+service->create(this, mAudioSessionId) 方法通过 IPC 的方式调用MediaPlayerService中的 create 方法获得 IMediaPlayer，IMediaPlayer 从名字就可以看出是一个 IInterface，所以 MediaPlayer 也是通过 IPC 来调用的。先看这个方法做了什么：
 
 ```cpp
 sp<IMediaPlayer> MediaPlayerService::create(const sp<IMediaPlayerClient>& client, int audioSessionId)
@@ -382,7 +382,7 @@ static void android_media_MediaPlayer_release(JNIEnv *env, jobject thiz)
 
 ## 总结
 
-到此为止mediaplayer的流程就算是走完了。重点总结一下**设置数据源**简单的时序图。
+到此为止mediaplayer的流程就算是走完了。重点总结一下**设置数据源**简单的时序图以及C/S的架构类图：
 
 ```mermaid
 sequenceDiagram
@@ -424,7 +424,28 @@ deactivate MediaPlayerService.cpp
 deactivate MediaPlayerService.cpp
 deactivate MediaPlayerService.cpp
 ```
-
+```mermaid
+classDiagram
+IMediaPlayerClient<|--BnMediaPlayerClient
+BnMediaPlayerClient<|--MediaPlayer
+class MediaPlayer{
+	sp~IMediaPlayer~ mPlayer 
+}
+BpMediaPlayer<..MediaPlayer
+IMediaPlayer<|--BpMediaPlayer
+IMediaPlayer<|--BnMediaPlayer
+BnMediaPlayer<|--Client
+class Client{
+	NuPlayer mPlayer
+}
+IMediaPlayerService<|--BnMediaPlayerService
+IMediaPlayerService<|--BpMediaPlayerService
+BnMediaPlayerService<|--MediaPlayerService
+class MediaPlayerService{
+	Client clients
+}
+Client--*MediaPlayerService
+```
 ## 参考文献
 
 [MediaPlayer](http://developer.android.com/reference/android/media/MediaPlayer.html)
