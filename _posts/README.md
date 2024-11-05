@@ -13,5 +13,4 @@
 
 - [ADB基本指令相关](ADB基本指令相关.md)
 
-> 博客端体验更佳，点击前往，[Redamancyer博客](https://redamancyer.github.io/#/)
-
+- [学习记录总结](学习记录总结.md)
