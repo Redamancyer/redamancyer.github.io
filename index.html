@@ -21,26 +21,29 @@
     <link rel="stylesheet alternative" href="_media/css/theme-simple-dark.css" title="dark">
     <link rel="shortcut icon" href="_media/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="_media/css/custom.css?version=24914">
+    <link rel="stylesheet" href="_media/css/xmind.min.css?version=01">
 </head>
 
 <body>
+    
     <div id="app">
         <div class="loader">Loading...</div>
     </div>
     <div id="popup">
         <div class="bg"><img class="out" src="" alt="" /></div>
     </div>
+    </script>
     <script>
         window.$docsify = {
             requestHeaders: {
                 'cache-control': 'max-age=60',
             },
-            basePath: '/_posts/',
+            basePath: '/',
             mermaidConfig: {
                 querySelector: ".mermaid"
             },
             name: '<img alt="Redamancyer’s Blog" class="out" src="/_media/img/logo.png"><div>Redamancyer</div><div class="index">\
-                <a href="/">首页</a>&nbsp;&nbsp;/&nbsp;&nbsp;<a href="/#/aboutme">关于我</a></div><hr>',
+                <a href="/">首页</a>&nbsp;&nbsp;/&nbsp;&nbsp;<a href="/#/_media/aboutme">关于我</a></div><hr>',
             repo: 'https://github.com/Redamancyer',
             themeColor: '#3498DB',
             topMargin: 30,
@@ -104,6 +107,7 @@
         mermaid.initialize({ startOnLoad: true });
         window.mermaid = mermaid;
     </script>
+    
     <script src="_media/js/docsify-mermaid.js"></script>
     <!-- Docsify v4 -->
     <script src="_media/js/docsify@4.js"></script>
@@ -159,7 +163,6 @@
     </script> -->
     <script src="_media/js/main.min.js" type="text/javascript">
     </script>
-
     <script src="_media/js/index.min.js" type="text/javascript">
     </script>
     <script src="_media/js/docsify-footer-enh.min.js"></script>
@@ -174,6 +177,7 @@
     <script src="_media/js/docsify-copy-code@2.js"></script>
     <script src="_media/js/touch-move.js"></script>
     <script src="_media/js/custom.js"></script>
+    <script src="_media/js/xmind.min.js"></script>
 </body>
 
 </html>
