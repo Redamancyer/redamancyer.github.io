@@ -1,1 +1,0 @@
-https://redamancyer.github.io/#/
