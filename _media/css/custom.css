@@ -1,22 +1,27 @@
 section.cover .cover-main {
     z-index: 100;
 }
-.medium-zoom-image{
+
+.medium-zoom-image {
     background-color: #fff;
 }
 
-footer{
+footer {
     margin: 15px auto;
 }
+
 hr {
     margin: 0 0;
 }
+
 .sidebar-nav li>a {
     font-size: 14px;
 }
+
 .markdown-section a {
     text-decoration: none;
 }
+
 /*.sidebar {
     width: 25rem;
 }*/
@@ -109,9 +114,11 @@ h1 {
 .sidebar {
     z-index: 0;
 }
+
 @media (min-width: 1024px) {
     .sidebar-toggle-button {
-        display: none; /* 在大屏幕设备上隐藏 */
+        display: none;
+        /* 在大屏幕设备上隐藏 */
     }
 }
 
@@ -228,7 +235,7 @@ h1 {
     }
 }
 
-.mermaid{
+.mermaid {
     width: 100%;
     text-align: center;
 }
@@ -239,4 +246,24 @@ p:has(span.mark) {
     line-height: 3;
     margin-bottom: 0px;
     margin-top: 0px;
+}
+
+p:has(> img) {
+    text-align: center;
+}
+
+aside h1 {
+    font-size: 20px;
+}
+
+aside h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0px 0px;
+}
+
+aside h3 {
+    font-size: 16px;
+    font-weight: 300;
+    margin: 0px 0px;
 }
