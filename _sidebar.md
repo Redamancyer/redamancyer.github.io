@@ -7,8 +7,9 @@
 
 ## 安卓学习
 ### 基础学习
-- [安卓Native中打印调用堆栈](/_posts/安卓学习/基础学习/安卓Native中打印调用堆栈.md)
 - [AOSP源码编译与Pixel刷机](_posts/安卓学习/基础学习/AOSP源码编译与Pixel刷机.md)
+- [安卓Native中打印调用堆栈](/_posts/安卓学习/基础学习/安卓Native中打印调用堆栈.md)
+- [Simpleperf生成火焰图](_posts/安卓学习/基础学习/Simpleperf生成火焰图.md)
 
 ### 源码分析
 - [Android 11添加系统服务](/_posts/安卓学习/源码分析/Android11添加系统服务.md)
