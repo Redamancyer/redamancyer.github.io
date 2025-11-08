@@ -19,6 +19,6 @@
 - [NuPlayer源码分析之解码模块](/_posts/安卓学习/源码分析/NuPlayer源码分析之解码模块.md)
 - [NuPlayer源码分析之渲染和同步模块](/_posts/安卓学习/源码分析/NuPlayer源码分析之渲染和同步模块.md)
 - [MediaCodec简介与使用详解](/_posts/安卓学习/源码分析/MediaCodec简介与使用详解.md)
-- [MediaCodec源码分析之解码流程](/_posts/安卓学习/源码分析/MediaCodec源码分析之解码流程.md)
+- [MediaCodec源码分析](/_posts/安卓学习/源码分析/MediaCodec源码分析.md)
 
 ### 案例记录
