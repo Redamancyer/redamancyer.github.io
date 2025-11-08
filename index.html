@@ -21,10 +21,11 @@
     <link rel="stylesheet alternative" href="_media/css/theme-simple-dark.css" title="dark">
     <link rel="shortcut icon" href="_media/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="_media/css/custom.css?version=24914">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar-folder.min.css" />
 </head>
 
 <body>
-    
+
     <div id="app">
         <div class="loader">Loading...</div>
     </div>
@@ -39,6 +40,10 @@
             },
             basePath: '/',
             loadSidebar: true,
+            alias: {
+                '/.*/_sidebar.md': '/_sidebar.md',
+            },
+            subMaxLevel: 3,
             mermaidConfig: {
                 querySelector: ".mermaid"
             },
@@ -99,16 +104,23 @@
         }
     </script>
     <!-- docsify-mermaid -->
+    <!-- Import D3.js -->
+    <!-- <script src="//cdn.jsdelivr.net/npm/d3@7"></script> -->
+    <script src="_media/js/d3.v7.js"></script>
     <script type="module">
         // import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
         import mermaid from "./_media/js/mermaid/mermaid.esm.min.mjs";
         mermaid.initialize({ startOnLoad: true });
         window.mermaid = mermaid;
     </script>
-    
+
     <script src="_media/js/docsify-mermaid.js"></script>
+    <script src="_media/js/docsify-mermaid-zoom.js"></script>
+
     <!-- Docsify v4 -->
     <script src="_media/js/docsify@4.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
+
     <!-- <script src="_media/js/search.min.js"></script> -->
     <!-- <script src="_media/js/countable.js"></script> -->
     <!-- CDN files for docsify-katex -->
@@ -173,7 +185,8 @@
     <!-- Latest v2.x.x -->
     <!-- <script src="https://unpkg.com/docsify-copy-code@2"></script> -->
     <script src="_media/js/docsify-copy-code@2.js"></script>
-    <script src="_media/js/touch-move.js"></script>
+    <!-- <script src="_media/js/touch-move.js"></script> -->
     <script src="_media/js/custom.js"></script>
 </body>
+
 </html>
