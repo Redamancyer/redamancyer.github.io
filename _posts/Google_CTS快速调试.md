@@ -1,11 +1,12 @@
 # Google_CTS快速调试
 
-> 若需要push媒体文件夹按下面方法操作，不用push测试资源的跳过前两项。
+> 若需要push媒体文件夹按下面方法操作，不用测试资源的跳过资源配置相关。
 ## 资源导入
 
 将资源文件的需要提前push到/data/local/tmp/CtsMediaPerformanceClassTestCases-3.2，CtsMediaPerformanceClassTestCases-3.2需要和模块源码中用到的名字一致。
 
-
+## 下载cts源码
+https://android.googlesource.com/platform/manifest
 
 ## 修改资源目录
 
