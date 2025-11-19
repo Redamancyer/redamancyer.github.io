@@ -1,4 +1,4 @@
-# Perfetto_trace抓取与python解析
+# Perfetto_trace抓取与解析
 
 ## trace抓取
 

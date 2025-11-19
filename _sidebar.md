@@ -10,7 +10,7 @@
     - [安卓Native中打印调用堆栈](_posts/安卓Native中打印调用堆栈.md)
     - [Simpleperf生成火焰图](_posts/Simpleperf生成火焰图.md)
     - [安卓多平台DUMP视频编解码](_posts/安卓多平台DUMP视频编解码.md)
-    - [Perfetto_trace抓取与python解析](_posts/Perfetto_trace抓取与python解析.md)
+    - [Perfetto_trace抓取与解析](_posts/Perfetto_trace抓取与解析.md)
     - [Google_CTS快速调试](_posts/Google_CTS快速调试.md)
 - 源码分析
     - [Android 11添加系统服务](_posts/Android11添加系统服务.md)
@@ -22,4 +22,4 @@
     - [MediaCodec简介与使用详解](_posts/MediaCodec简介与使用详解.md)
     - [MediaCodec源码分析](_posts/MediaCodec源码分析.md)
 - 案例记录
-    - [Test](_posts/Android11添加系统服务.md)
+    - [唱吧K歌闹钟双响问题](_posts/唱吧K歌闹钟双响问题.md)
