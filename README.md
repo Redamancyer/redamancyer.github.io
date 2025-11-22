@@ -1,6 +1,10 @@
 # 路虽远，行则将至。 事虽难，做则可成。
-> 可直接访问静态网址观看仓库文件内容：[redmancyer.github.io](https://redamancyer.github.io/)
+
+<iframe src="./_media/html/clock.html" width="100%" height="130" frameborder="0" style="margin-top:50px"></iframe>
+
 ## 我是谁...
 > 本仓库是由Android的开发者的学习记录，一起分享，一起进步ing...
 ## 联系方式
 > 邮箱：quantalmatrix@gmail.com	|	QQ:1763420434
+
+> 可直接访问静态网址观看仓库文件内容：[redmancyer.github.io](https://redamancyer.github.io/)
